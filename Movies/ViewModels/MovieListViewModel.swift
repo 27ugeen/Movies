@@ -19,14 +19,14 @@ final class MovieListViewModel {
     
     func fetchMovies(page: Int) {
         movieService.fetchPopularMovies(page: page) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movies):
-                    self?.movies.append(contentsOf: movies)
-                    self?.onMoviesUpdated?()
-                case .failure(let error):
-                    self?.onError?(error.localizedDescription)
-                }
+            switch result {
+            case .success(let movies):
+                print("Movies fetched: \(movies)")
+                self?.movies.append(contentsOf: movies)
+                self?.onMoviesUpdated?()
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                self?.onError?(error.localizedDescription)
             }
         }
     }

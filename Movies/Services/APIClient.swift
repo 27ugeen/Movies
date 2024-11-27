@@ -6,39 +6,51 @@
 //
 
 import Foundation
+import Alamofire
 
 protocol APIClientProtocol {
-    func performRequest<T: Decodable>(endpoint: String, completion: @escaping (Result<T, Error>) -> Void)
+    func performRequest<T: Decodable>(
+        endpoint: String,
+        queryItems: [URLQueryItem],
+        completion: @escaping (Result<T, Error>) -> Void
+    )
 }
 
 final class APIClient: APIClientProtocol {
     private let baseURL = "https://api.themoviedb.org/3/"
-    private let apiKey = "YOUR_API_KEY"
-
-    func performRequest<T: Decodable>(endpoint: String, completion: @escaping (Result<T, Error>) -> Void) {
-        guard let url = URL(string: baseURL + endpoint + "&api_key=\(apiKey)") else {
+    private let bearerToken: String = {
+        guard let token = Bundle.main.object(forInfoDictionaryKey: "MOVIE_DB_BEARER_TOKEN") as? String else {
+            fatalError("Bearer Token is missing in Info.plist")
+        }
+        return token
+    }()
+    
+    func performRequest<T: Decodable>(
+        endpoint: String,
+        queryItems: [URLQueryItem],
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        guard var urlComponents = URLComponents(string: baseURL + endpoint) else {
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        urlComponents.queryItems = queryItems
+        
+        guard let url = urlComponents.url else {
             completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
             return
         }
         
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
-                return
-            }
-            
-            do {
-                let decodedResponse = try JSONDecoder().decode(T.self, from: data)
+        AF.request(url, method: .get, headers: [
+            "Authorization": "Bearer \(bearerToken)",
+            "Accept": "application/json"
+        ]).validate().responseDecodable(of: T.self) { response in
+            switch response.result {
+            case .success(let decodedResponse):
                 completion(.success(decodedResponse))
-            } catch {
+            case .failure(let error):
                 completion(.failure(error))
             }
         }
-        task.resume()
     }
 }

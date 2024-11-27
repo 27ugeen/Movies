@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>MOVIE_DB_BEARER_TOKEN</key>
+	<string>eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiNWU4MjA1NTNlNWZkOTExNGU0OTYzNzE3NGM5Y2ZkYSIsIm5iZiI6MTczMjY5MTcxOS44NjQ3OTMsInN1YiI6IjVlNGMzMTE0OWI4NjE2MDAxNjY2M2E3MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.r7q5QwMShsKYe2EtroM_nQlQavdID2G5ECi7Un1rX2s</string>
+	<key>MOVIE_DB_API_KEY</key>
+	<string>b5e820553e5fd9114e49637174c9cfda</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
