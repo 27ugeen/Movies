@@ -26,7 +26,7 @@ final class MovieListViewModel {
     var onError: ((String) -> Void)?
     
     private var currentPage: Int = 1
-    var currentSortOption: MovieSortOption = .ratingDescending
+    var currentSortOption: MovieSortOption = .popularityDescending
     
     init(movieService: MovieServiceProtocol) {
         self.movieService = movieService

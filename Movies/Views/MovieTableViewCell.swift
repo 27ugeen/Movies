@@ -10,15 +10,17 @@ import UIKit
 final class MovieTableViewCell: UITableViewCell {
     static let identifier = "MovieTableViewCell"
     
-    private let posterImageView = UIImageView()
+    private let backdropImageView = UIImageView()
+    private let overlayView = UIView()
     private let titleLabel = UILabel()
+    private let releaseDateLabel = UILabel()
     private let genreLabel = UILabel()
     private let ratingLabel = UILabel()
-    private let releaseDateLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
+        setupShadow()
     }
     
     required init?(coder: NSCoder) {
@@ -26,61 +28,89 @@ final class MovieTableViewCell: UITableViewCell {
     }
     
     private func setupUI() {
-        posterImageView.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        genreLabel.translatesAutoresizingMaskIntoConstraints = false
-        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
-        releaseDateLabel.translatesAutoresizingMaskIntoConstraints = false
+        setupBackDrop()
+        setupLabels()
         
-        contentView.addSubview(posterImageView)
+        contentView.addSubview(backdropImageView)
+        backdropImageView.addSubview(overlayView)
         contentView.addSubview(titleLabel)
+        contentView.addSubview(releaseDateLabel)
         contentView.addSubview(genreLabel)
         contentView.addSubview(ratingLabel)
-        contentView.addSubview(releaseDateLabel)
         
         NSLayoutConstraint.activate([
-            posterImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
-            posterImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            posterImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
-            posterImageView.widthAnchor.constraint(equalToConstant: 60),
+            backdropImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            backdropImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            backdropImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            backdropImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             
-            titleLabel.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 10),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            overlayView.leadingAnchor.constraint(equalTo: backdropImageView.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: backdropImageView.trailingAnchor),
+            overlayView.topAnchor.constraint(equalTo: backdropImageView.topAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor),
             
-            genreLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            genreLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            genreLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
+            titleLabel.leadingAnchor.constraint(equalTo: backdropImageView.leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: releaseDateLabel.leadingAnchor, constant: -12),
+            titleLabel.topAnchor.constraint(equalTo: backdropImageView.topAnchor, constant: 12),
             
-            ratingLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            ratingLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 5),
+            releaseDateLabel.trailingAnchor.constraint(equalTo: backdropImageView.trailingAnchor, constant: -12),
+            releaseDateLabel.topAnchor.constraint(equalTo: backdropImageView.topAnchor, constant: 12),
+            releaseDateLabel.widthAnchor.constraint(equalToConstant: 80),
             
-            releaseDateLabel.leadingAnchor.constraint(equalTo: ratingLabel.trailingAnchor, constant: 10),
-            releaseDateLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            releaseDateLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 5)
+            genreLabel.leadingAnchor.constraint(equalTo: backdropImageView.leadingAnchor, constant: 12),
+            genreLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12),
+            
+            ratingLabel.trailingAnchor.constraint(equalTo: backdropImageView.trailingAnchor, constant: -12),
+            ratingLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12)
         ])
+    }
+    
+    private func setupBackDrop() {
+        backdropImageView.translatesAutoresizingMaskIntoConstraints = false
+        backdropImageView.contentMode = .scaleAspectFill
+        backdropImageView.clipsToBounds = true
+        backdropImageView.layer.cornerRadius = 8
         
-        posterImageView.contentMode = .scaleAspectFill
-        posterImageView.clipsToBounds = true
-        
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+    }
+    
+    private func setupLabels() {
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        titleLabel.textColor = .white
+        titleLabel.numberOfLines = 0
+        
+        genreLabel.translatesAutoresizingMaskIntoConstraints = false
         genreLabel.font = UIFont.systemFont(ofSize: 14)
-        genreLabel.textColor = .gray
+        genreLabel.textColor = .white
+        
+        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
         ratingLabel.font = UIFont.systemFont(ofSize: 14)
-        ratingLabel.textColor = .systemBlue
+        ratingLabel.textColor = .systemOrange
+        
+        releaseDateLabel.translatesAutoresizingMaskIntoConstraints = false
         releaseDateLabel.font = UIFont.systemFont(ofSize: 14)
-        releaseDateLabel.textColor = .gray
+        releaseDateLabel.textColor = .white
+    }
+    
+    private func setupShadow() {
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 8
+        layer.masksToBounds = false
     }
     
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
         genreLabel.text = movie.genreIds?.isEmpty == false
-            ? "Genres: \(movie.genreIds!.map { String($0) }.joined(separator: ", "))"
-            : "No genres available"
-
+        ? "Genres: \(movie.genreIds!.map { String($0) }.joined(separator: ", "))"
+        : "No genres available"
+        
         ratingLabel.text = movie.voteAverage != nil
-            ? "Rating: \(movie.voteAverage!)"
-            : "Rating: N/A"
+        ? "Rating: \(movie.voteAverage!)"
+        : "Rating: N/A"
         
         if let releaseYear = movie.releaseDate?.split(separator: "-").first {
             releaseDateLabel.text = "Year: \(releaseYear)"
@@ -88,15 +118,15 @@ final class MovieTableViewCell: UITableViewCell {
             releaseDateLabel.text = "Year: N/A"
         }
         
-        if let posterPath = movie.posterPath {
-            let imageURL = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
+        if let backdropPath = movie.backdropPath {
+            let imageURL = URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
             if let url = imageURL {
                 loadImage(from: url)
             } else {
-                posterImageView.image = nil
+                backdropImageView.image = nil
             }
         } else {
-            posterImageView.image = nil
+            backdropImageView.image = nil
         }
     }
     
@@ -104,7 +134,7 @@ final class MovieTableViewCell: UITableViewCell {
         URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
             guard let data = data, error == nil else { return }
             DispatchQueue.main.async {
-                self?.posterImageView.image = UIImage(data: data)
+                self?.backdropImageView.image = UIImage(data: data)
             }
         }.resume()
     }
