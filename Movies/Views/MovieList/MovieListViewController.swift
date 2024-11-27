@@ -11,8 +11,9 @@ final class MovieListViewController: UIViewController {
     
     private let viewModel: MovieListViewModel
     
-    private let searchBar = UISearchBar()
-    private let tableView = UITableView()
+    private let searchBar = SearchBar()
+    private let tableView = MovieListTableView()
+    private let emptyStateView = EmptyStateView()
     
     init(viewModel: MovieListViewModel) {
         self.viewModel = viewModel
@@ -39,7 +40,11 @@ final class MovieListViewController: UIViewController {
     
     private func bindViewModel() {
         viewModel.onMoviesUpdated = { [weak self] in
-            self?.tableView.reloadData()
+            guard let self else { return }
+            let hasMovies = !viewModel.filteredMovies.isEmpty
+            emptyStateView.isHidden = hasMovies
+            tableView.isHidden = !hasMovies
+            tableView.reloadData()
         }
         
         viewModel.onError = { [weak self] errorMessage in
@@ -48,18 +53,23 @@ final class MovieListViewController: UIViewController {
     }
     
     private func setupUI() {
-        setupView()
-        setupSearchBar()
-        setupTableView()
+        setupViews()
         addSortButton()
         
         view.addSubview(tableView)
         view.addSubview(searchBar)
+        view.addSubview(emptyStateView)
+        NSLayoutConstraint.activate([
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyStateView.topAnchor.constraint(equalTo: view.topAnchor),
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -68,22 +78,15 @@ final class MovieListViewController: UIViewController {
         ])
     }
     
-    private func setupView() {
+    private func setupViews() {
         title = "Popular Movies"
         view.backgroundColor = .white
-    }
-    
-    private func setupSearchBar() {
-        searchBar.placeholder = "Search movies"
+        
         searchBar.delegate = self
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-    }
-    
-    private func setupTableView() {
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func addSortButton() {

@@ -10,12 +10,12 @@ import UIKit
 final class MovieTableViewCell: UITableViewCell {
     static let identifier = "MovieTableViewCell"
     
-    private let backdropImageView = UIImageView()
-    private let overlayView = UIView()
-    private let titleLabel = UILabel()
-    private let releaseDateLabel = UILabel()
-    private let genreLabel = UILabel()
-    private let ratingLabel = UILabel()
+    private let backdropImageView = BackdropImageView()
+    private let overlayView = OverlayView()
+    private let titleLabel = CommonLabel()
+    private let releaseDateLabel = CommonLabel()
+    private let genreLabel = CommonLabel()
+    private let ratingLabel = CommonLabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -28,8 +28,8 @@ final class MovieTableViewCell: UITableViewCell {
     }
     
     private func setupUI() {
-        setupBackDrop()
-        setupLabels()
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        ratingLabel.textColor = .systemOrange
         
         contentView.addSubview(backdropImageView)
         backdropImageView.addSubview(overlayView)
@@ -65,36 +65,6 @@ final class MovieTableViewCell: UITableViewCell {
             ratingLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12),
             ratingLabel.widthAnchor.constraint(equalToConstant: 88),
         ])
-    }
-    
-    private func setupBackDrop() {
-        backdropImageView.translatesAutoresizingMaskIntoConstraints = false
-        backdropImageView.contentMode = .scaleAspectFill
-        backdropImageView.clipsToBounds = true
-        backdropImageView.layer.cornerRadius = 8
-        
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-    }
-    
-    private func setupLabels() {
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        titleLabel.textColor = .white
-        titleLabel.numberOfLines = 0
-        
-        genreLabel.translatesAutoresizingMaskIntoConstraints = false
-        genreLabel.font = UIFont.systemFont(ofSize: 14)
-        genreLabel.textColor = .white
-        genreLabel.numberOfLines = 0
-        
-        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
-        ratingLabel.font = UIFont.systemFont(ofSize: 14)
-        ratingLabel.textColor = .systemOrange
-        
-        releaseDateLabel.translatesAutoresizingMaskIntoConstraints = false
-        releaseDateLabel.font = UIFont.systemFont(ofSize: 14)
-        releaseDateLabel.textColor = .white
     }
     
     private func setupShadow() {
