@@ -25,9 +25,26 @@ final class MovieListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        fetchGenresAndMovies()
         bindViewModel()
-        viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption)
+        setupUI()
+    }
+    
+    private func fetchGenresAndMovies() {
+        viewModel.fetchGenres { [weak self] in
+            guard let self else { return }
+            viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption)
+        }
+    }
+    
+    private func bindViewModel() {
+        viewModel.onMoviesUpdated = { [weak self] in
+            self?.tableView.reloadData()
+        }
+        
+        viewModel.onError = { [weak self] errorMessage in
+            self?.showErrorAlert(message: errorMessage)
+        }
     }
     
     private func setupUI() {
@@ -111,16 +128,6 @@ final class MovieListViewController: UIViewController {
         viewModel.sortMovies(by: option)
     }
     
-    private func bindViewModel() {
-        viewModel.onMoviesUpdated = { [weak self] in
-            self?.tableView.reloadData()
-        }
-        
-        viewModel.onError = { [weak self] errorMessage in
-            self?.showErrorAlert(message: errorMessage)
-        }
-    }
-    
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -138,7 +145,7 @@ extension MovieListViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         let movie = viewModel.filteredMovies[indexPath.row]
-        cell.configure(with: movie)
+        cell.configure(with: movie, genres: viewModel.genres)
         return cell
     }
     

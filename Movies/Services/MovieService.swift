@@ -10,10 +10,12 @@ import Foundation
 protocol MovieServiceProtocol {
     func fetchPopularMovies(page: Int, sortBy: String, completion: @escaping (Result<[Movie], Error>) -> Void)
     func fetchMovieDetails(id: Int, completion: @escaping (Result<MovieDetails, Error>) -> Void)
+    func fetchGenres(completion: @escaping (Result<[Genre], Error>) -> Void)
 }
 
 final class MovieService: MovieServiceProtocol {
     private let apiClient: APIClientProtocol
+    private var genresCache: [Int: String] = [:]
     
     init(apiClient: APIClientProtocol) {
         self.apiClient = apiClient
@@ -46,5 +48,27 @@ final class MovieService: MovieServiceProtocol {
             queryItems: queryItems,
             completion: completion
         )
+    }
+    
+    func fetchGenres(completion: @escaping (Result<[Genre], Error>) -> Void) {
+        if !genresCache.isEmpty {
+            let genres = genresCache.map { Genre(id: $0.key, name: $0.value) }
+            completion(.success(genres))
+            return
+        }
+        
+        let queryItems = [
+            URLQueryItem(name: "language", value: "en-US")
+        ]
+        
+        apiClient.performRequest(endpoint: "genre/movie/list", queryItems: queryItems) { (result: Result<GenreResponse, Error>) in
+            switch result {
+            case .success(let response):
+                //                print("res \(response.genres)")
+                completion(.success(response.genres))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
 }

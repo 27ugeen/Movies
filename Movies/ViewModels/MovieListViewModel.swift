@@ -22,6 +22,7 @@ final class MovieListViewModel {
         }
     }
     private(set) var filteredMovies: [Movie] = []
+    private(set) var genres: [Int: String] = [:]
     var onMoviesUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
     
@@ -80,5 +81,18 @@ final class MovieListViewModel {
             filteredMovies = movies.filter { $0.title.lowercased().contains(query.lowercased()) }
         }
         onMoviesUpdated?()
+    }
+    
+    func fetchGenres(completion: @escaping () -> Void) {
+        movieService.fetchGenres { [weak self] result in
+            switch result {
+            case .success(let genres):
+                self?.genres = genres.reduce(into: [:]) { $0[$1.id] = $1.name }
+                completion()
+            case .failure(let error):
+                print("Failed to fetch genres: \(error.localizedDescription)")
+                completion()
+            }
+        }
     }
 }

@@ -58,10 +58,12 @@ final class MovieTableViewCell: UITableViewCell {
             releaseDateLabel.widthAnchor.constraint(equalToConstant: 80),
             
             genreLabel.leadingAnchor.constraint(equalTo: backdropImageView.leadingAnchor, constant: 12),
+            genreLabel.trailingAnchor.constraint(lessThanOrEqualTo: ratingLabel.leadingAnchor, constant: -12),
             genreLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12),
             
             ratingLabel.trailingAnchor.constraint(equalTo: backdropImageView.trailingAnchor, constant: -12),
-            ratingLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12)
+            ratingLabel.bottomAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: -12),
+            ratingLabel.widthAnchor.constraint(equalToConstant: 88),
         ])
     }
     
@@ -84,6 +86,7 @@ final class MovieTableViewCell: UITableViewCell {
         genreLabel.translatesAutoresizingMaskIntoConstraints = false
         genreLabel.font = UIFont.systemFont(ofSize: 14)
         genreLabel.textColor = .white
+        genreLabel.numberOfLines = 0
         
         ratingLabel.translatesAutoresizingMaskIntoConstraints = false
         ratingLabel.font = UIFont.systemFont(ofSize: 14)
@@ -102,21 +105,13 @@ final class MovieTableViewCell: UITableViewCell {
         layer.masksToBounds = false
     }
     
-    func configure(with movie: Movie) {
+    func configure(with movie: Movie, genres: [Int: String]) {
+        let genreNames = movie.genreIds?.compactMap { genres[$0] } ?? []
+        
+        genreLabel.text = genreNames.isEmpty ? "No genres available" : genreNames.joined(separator: ", ")
         titleLabel.text = movie.title
-        genreLabel.text = movie.genreIds?.isEmpty == false
-        ? "Genres: \(movie.genreIds!.map { String($0) }.joined(separator: ", "))"
-        : "No genres available"
-        
-        ratingLabel.text = movie.voteAverage != nil
-        ? "Rating: \(movie.voteAverage!)"
-        : "Rating: N/A"
-        
-        if let releaseYear = movie.releaseDate?.split(separator: "-").first {
-            releaseDateLabel.text = "Year: \(releaseYear)"
-        } else {
-            releaseDateLabel.text = "Year: N/A"
-        }
+        ratingLabel.text = movie.voteAverage.map { String(format: "Rating: %.1f", $0) } ?? "Rating: N/A"
+        releaseDateLabel.text = movie.releaseDate?.split(separator: "-").first.map { "Year: \($0)" } ?? "Year: N/A"
         
         if let backdropPath = movie.backdropPath {
             let imageURL = URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
