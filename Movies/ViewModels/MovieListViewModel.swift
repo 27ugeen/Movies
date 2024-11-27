@@ -9,7 +9,12 @@ import Foundation
 
 final class MovieListViewModel {
     private let movieService: MovieServiceProtocol
-    private(set) var movies: [Movie] = []
+    private(set) var movies: [Movie] = [] {
+        didSet {
+            filteredMovies = movies
+        }
+    }
+    private(set) var filteredMovies: [Movie] = []
     var onMoviesUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
     
@@ -21,7 +26,6 @@ final class MovieListViewModel {
         movieService.fetchPopularMovies(page: page) { [weak self] result in
             switch result {
             case .success(let movies):
-                print("Movies fetched: \(movies)")
                 self?.movies.append(contentsOf: movies)
                 self?.onMoviesUpdated?()
             case .failure(let error):
@@ -29,5 +33,14 @@ final class MovieListViewModel {
                 self?.onError?(error.localizedDescription)
             }
         }
+    }
+    
+    func searchMovies(by query: String) {
+        if query.isEmpty {
+            filteredMovies = movies
+        } else {
+            filteredMovies = movies.filter { $0.title.lowercased().contains(query.lowercased()) }
+        }
+        onMoviesUpdated?()
     }
 }

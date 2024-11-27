@@ -20,6 +20,7 @@
 		115E6E802CF711DC00A6CAC6 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115E6E7F2CF711DC00A6CAC6 /* AppCoordinator.swift */; };
 		115E6E822CF71DE600A6CAC6 /* MovieResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115E6E812CF71DE600A6CAC6 /* MovieResponse.swift */; };
 		11F069DB2CF737A400E51A3C /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 11F069DA2CF737A400E51A3C /* Alamofire */; };
+		11F069DD2CF7391200E51A3C /* MovieTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F069DC2CF7391200E51A3C /* MovieTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		115E6E7D2CF7118D00A6CAC6 /* MovieListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListViewController.swift; sourceTree = "<group>"; };
 		115E6E7F2CF711DC00A6CAC6 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		115E6E812CF71DE600A6CAC6 /* MovieResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieResponse.swift; sourceTree = "<group>"; };
+		11F069DC2CF7391200E51A3C /* MovieTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				115E6E7D2CF7118D00A6CAC6 /* MovieListViewController.swift */,
+				11F069DC2CF7391200E51A3C /* MovieTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -220,6 +223,7 @@
 				115E6E5C2CF706FE00A6CAC6 /* SceneDelegate.swift in Sources */,
 				115E6E7E2CF7118D00A6CAC6 /* MovieListViewController.swift in Sources */,
 				115E6E782CF7108D00A6CAC6 /* APIClient.swift in Sources */,
+				11F069DD2CF7391200E51A3C /* MovieTableViewCell.swift in Sources */,
 				115E6E7A2CF710D400A6CAC6 /* MovieService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

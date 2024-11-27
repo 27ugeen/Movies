@@ -8,7 +8,11 @@
 import UIKit
 
 final class MovieListViewController: UIViewController {
+    
     private let viewModel: MovieListViewModel
+    
+    private let searchBar = UISearchBar()
+    private let tableView = UITableView()
     
     init(viewModel: MovieListViewModel) {
         self.viewModel = viewModel
@@ -27,13 +31,36 @@ final class MovieListViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .systemBlue
+        title = "Popular Movies"
+        view.backgroundColor = .white
+        
+        searchBar.placeholder = "Search movies"
+        searchBar.delegate = self
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(tableView)
+        view.addSubview(searchBar)
+
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
     private func bindViewModel() {
         viewModel.onMoviesUpdated = { [weak self] in
-            guard let self else { return }
-            // Reload table view
+            self?.tableView.reloadData()
         }
         
         viewModel.onError = { [weak self] errorMessage in
@@ -45,5 +72,37 @@ final class MovieListViewController: UIViewController {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+}
+
+extension MovieListViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.filteredMovies.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: MovieTableViewCell.identifier, for: indexPath) as? MovieTableViewCell else {
+            return UITableViewCell()
+        }
+        let movie = viewModel.filteredMovies[indexPath.row]
+        cell.configure(with: movie)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 200
+    }
+}
+
+extension MovieListViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        // Handle movie selection
+    }
+}
+
+extension MovieListViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.searchMovies(by: searchText)
     }
 }
