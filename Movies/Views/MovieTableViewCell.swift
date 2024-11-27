@@ -74,10 +74,15 @@ final class MovieTableViewCell: UITableViewCell {
     
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
-        genreLabel.text = "Genres not available"
-        ratingLabel.text = String(format: "Rating: %.1f", movie.voteAverage)
+        genreLabel.text = movie.genreIds?.isEmpty == false
+            ? "Genres: \(movie.genreIds!.map { String($0) }.joined(separator: ", "))"
+            : "No genres available"
+
+        ratingLabel.text = movie.voteAverage != nil
+            ? "Rating: \(movie.voteAverage!)"
+            : "Rating: N/A"
         
-        if let releaseYear = movie.releaseDate.split(separator: "-").first {
+        if let releaseYear = movie.releaseDate?.split(separator: "-").first {
             releaseDateLabel.text = "Year: \(releaseYear)"
         } else {
             releaseDateLabel.text = "Year: N/A"

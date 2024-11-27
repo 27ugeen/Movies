@@ -49,6 +49,12 @@ final class APIClient: APIClientProtocol {
             case .success(let decodedResponse):
                 completion(.success(decodedResponse))
             case .failure(let error):
+                if let data = response.data, let jsonString = String(data: data, encoding: .utf8) {
+                    print("Failed to decode JSON for \(T.self): \(error)")
+                    print("Raw JSON: \(jsonString)")
+                } else {
+                    print("No data available. Error: \(error)")
+                }
                 completion(.failure(error))
             }
         }

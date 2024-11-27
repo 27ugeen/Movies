@@ -10,21 +10,21 @@ import Foundation
 struct Movie: Decodable {
     let id: Int
     let title: String
+    let overview: String?
+    let releaseDate: String?
     let posterPath: String?
-    let genreIds: [Int]
-    let releaseDate: String
-    let voteAverage: Double
-    let overview: String
-    let adult: Bool
-
+    let backdropPath: String?
+    let voteAverage: Double?
+    let genreIds: [Int]?
+    
     private enum CodingKeys: String, CodingKey {
         case id
         case title
-        case posterPath = "poster_path"
-        case genreIds = "genre_ids"
-        case releaseDate = "release_date"
-        case voteAverage = "vote_average"
         case overview
-        case adult
+        case releaseDate = "release_date"
+        case posterPath = "poster_path"
+        case backdropPath = "backdrop_path"
+        case voteAverage = "vote_average"
+        case genreIds = "genre_ids"
     }
 }

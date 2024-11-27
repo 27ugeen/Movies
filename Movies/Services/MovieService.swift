@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MovieServiceProtocol {
-    func fetchPopularMovies(page: Int, completion: @escaping (Result<[Movie], Error>) -> Void)
+    func fetchPopularMovies(page: Int, sortBy: String, completion: @escaping (Result<[Movie], Error>) -> Void)
     func fetchMovieDetails(id: Int, completion: @escaping (Result<MovieDetails, Error>) -> Void)
 }
 
@@ -19,19 +19,14 @@ final class MovieService: MovieServiceProtocol {
         self.apiClient = apiClient
     }
     
-    func fetchPopularMovies(
-        page: Int,
-        completion: @escaping (Result<[Movie], Error>) -> Void
-    ) {
+    func fetchPopularMovies(page: Int, sortBy: String, completion: @escaping (Result<[Movie], Error>) -> Void) {
         let queryItems = [
             URLQueryItem(name: "page", value: "\(page)"),
-            URLQueryItem(name: "language", value: "en-US")
+            URLQueryItem(name: "language", value: "en-US"),
+            URLQueryItem(name: "sort_by", value: sortBy)
         ]
         
-        apiClient.performRequest(
-            endpoint: "movie/popular",
-            queryItems: queryItems
-        ) { (result: Result<MovieResponse, Error>) in
+        apiClient.performRequest(endpoint: "discover/movie", queryItems: queryItems) { (result: Result<MovieResponse, Error>) in
             switch result {
             case .success(let response):
                 completion(.success(response.results))
@@ -41,10 +36,7 @@ final class MovieService: MovieServiceProtocol {
         }
     }
     
-    func fetchMovieDetails(
-        id: Int,
-        completion: @escaping (Result<MovieDetails, Error>) -> Void
-    ) {
+    func fetchMovieDetails(id: Int, completion: @escaping (Result<MovieDetails, Error>) -> Void) {
         let queryItems = [
             URLQueryItem(name: "language", value: "en-US")
         ]

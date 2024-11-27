@@ -27,25 +27,18 @@ final class MovieListViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
-        viewModel.fetchMovies(page: 1)
+        viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption)
     }
     
     private func setupUI() {
-        title = "Popular Movies"
-        view.backgroundColor = .white
-        
-        searchBar.placeholder = "Search movies"
-        searchBar.delegate = self
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        setupView()
+        setupSearchBar()
+        setupTableView()
+        addSortButton()
         
         view.addSubview(tableView)
         view.addSubview(searchBar)
-
+        
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -56,6 +49,66 @@ final class MovieListViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func setupView() {
+        title = "Popular Movies"
+        view.backgroundColor = .white
+    }
+    
+    private func setupSearchBar() {
+        searchBar.placeholder = "Search movies"
+        searchBar.delegate = self
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func setupTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func addSortButton() {
+        let sortButton = UIBarButtonItem(
+            title: "Sort",
+            style: .plain,
+            target: self,
+            action: #selector(didTapSortButton)
+        )
+        navigationItem.rightBarButtonItem = sortButton
+    }
+    
+    @objc private func didTapSortButton() {
+        let actionSheet = UIAlertController(
+            title: "Sort Movies",
+            message: "Select sorting option",
+            preferredStyle: .actionSheet
+        )
+        
+        let options: [(String, MovieSortOption)] = [
+            ("Popularity (High-Low)", .popularityDescending),
+            ("Popularity (Low-High)", .popularityAscending),
+            ("Rating (High-Low)", .ratingDescending),
+            ("Rating (Low-High)", .ratingAscending)
+        ]
+        
+        for (title, option) in options {
+            let action = UIAlertAction(title: title, style: .default, handler: { [weak self] _ in
+                self?.viewModel.sortMovies(by: option)
+            })
+            if option == viewModel.currentSortOption {
+                action.setValue(true, forKey: "checked")
+            }
+            actionSheet.addAction(action)
+        }
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(actionSheet, animated: true, completion: nil)
+    }
+    
+    private func sortMovies(by option: MovieSortOption) {
+        viewModel.sortMovies(by: option)
     }
     
     private func bindViewModel() {
@@ -98,6 +151,16 @@ extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // Handle movie selection
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+        
+        if offsetY > contentHeight - height - 100 {
+            viewModel.loadMoreMovies()
+        }
     }
 }
 

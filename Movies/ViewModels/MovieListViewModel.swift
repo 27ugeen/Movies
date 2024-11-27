@@ -7,6 +7,13 @@
 
 import Foundation
 
+enum MovieSortOption {
+    case popularityDescending
+    case popularityAscending
+    case ratingDescending
+    case ratingAscending
+}
+
 final class MovieListViewModel {
     private let movieService: MovieServiceProtocol
     private(set) var movies: [Movie] = [] {
@@ -18,21 +25,52 @@ final class MovieListViewModel {
     var onMoviesUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
     
+    private var currentPage: Int = 1
+    var currentSortOption: MovieSortOption = .ratingDescending
+    
     init(movieService: MovieServiceProtocol) {
         self.movieService = movieService
     }
     
-    func fetchMovies(page: Int) {
-        movieService.fetchPopularMovies(page: page) { [weak self] result in
+    func fetchMovies(page: Int, sortBy: MovieSortOption) {
+        let sortQuery: String
+        switch sortBy {
+        case .popularityDescending:
+            sortQuery = "popularity.desc"
+        case .popularityAscending:
+            sortQuery = "popularity.asc"
+        case .ratingDescending:
+            sortQuery = "vote_average.desc"
+        case .ratingAscending:
+            sortQuery = "vote_average.asc"
+        }
+        
+        movieService.fetchPopularMovies(page: page, sortBy: sortQuery) { [weak self] result in
             switch result {
             case .success(let movies):
-                self?.movies.append(contentsOf: movies)
+                if page == 1 {
+                    self?.movies = movies
+                } else {
+                    self?.movies.append(contentsOf: movies)
+                }
+                self?.filteredMovies = self?.movies ?? []
                 self?.onMoviesUpdated?()
             case .failure(let error):
                 print("Error: \(error.localizedDescription)")
                 self?.onError?(error.localizedDescription)
             }
         }
+    }
+    
+    func loadMoreMovies() {
+        currentPage += 1
+        fetchMovies(page: currentPage, sortBy: currentSortOption)
+    }
+    
+    func sortMovies(by option: MovieSortOption) {
+        currentSortOption = option
+        currentPage = 1
+        fetchMovies(page: currentPage, sortBy: option)
     }
     
     func searchMovies(by query: String) {
