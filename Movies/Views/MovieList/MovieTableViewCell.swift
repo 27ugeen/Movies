@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class MovieTableViewCell: UITableViewCell {
     static let identifier = "MovieTableViewCell"
@@ -84,23 +85,52 @@ final class MovieTableViewCell: UITableViewCell {
         releaseDateLabel.text = movie.releaseDate?.split(separator: "-").first.map { "Year: \($0)" } ?? "Year: N/A"
         
         if let backdropPath = movie.backdropPath {
-            let imageURL = URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
-            if let url = imageURL {
-                loadImage(from: url)
-            } else {
-                backdropImageView.image = nil
-            }
+            loadImage(from: "https://image.tmdb.org/t/p/w780\(backdropPath)")
+        } else if let posterPath = movie.posterPath {
+            loadImage(from: "https://image.tmdb.org/t/p/w780\(posterPath)")
         } else {
-            backdropImageView.image = nil
+            backdropImageView.image = UIImage(named: "cat")
         }
     }
     
-    private func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async {
-                self?.backdropImageView.image = UIImage(data: data)
+    private func loadImage(from urlString: String) {
+        ImageLoader.loadImage(
+            into: backdropImageView,
+            from: urlString,
+            onError: { [weak self] errorMessage in
+                // TODO: Implement a proper error handling mechanism for image loading issues.
+                // For now, we simply log the error message.
+                print("Image Load Error: \(errorMessage)")
             }
-        }.resume()
+        )
     }
+    
+//    func configure(with movie: Movie, genres: [Int: String]) {
+//        let genreNames = movie.genreIds?.compactMap { genres[$0] } ?? []
+//        
+//        genreLabel.text = genreNames.isEmpty ? "No genres available" : genreNames.joined(separator: ", ")
+//        titleLabel.text = movie.title
+//        ratingLabel.text = movie.voteAverage.map { String(format: "Rating: %.1f", $0) } ?? "Rating: N/A"
+//        releaseDateLabel.text = movie.releaseDate?.split(separator: "-").first.map { "Year: \($0)" } ?? "Year: N/A"
+//        
+//        if let backdropPath = movie.backdropPath {
+//            let imageURL = URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
+//            if let url = imageURL {
+//                loadImage(from: url)
+//            } else {
+//                backdropImageView.image = nil
+//            }
+//        } else {
+//            backdropImageView.image = nil
+//        }
+//    }
+//    
+//    private func loadImage(from url: URL) {
+//        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+//            guard let data = data, error == nil else { return }
+//            DispatchQueue.main.async {
+//                self?.backdropImageView.image = UIImage(data: data)
+//            }
+//        }.resume()
+//    }
 }

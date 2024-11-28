@@ -58,7 +58,7 @@ final class MovieListViewController: UIViewController {
         }
         
         viewModel.onError = { [weak self] errorMessage in
-            self?.showErrorAlert(message: errorMessage)
+            self?.showAlert(title: "Error", message: errorMessage)
         }
     }
     
@@ -146,12 +146,6 @@ final class MovieListViewController: UIViewController {
     
     private func sortMovies(by option: MovieSortOption) {
         viewModel.sortMovies(by: option)
-    }
-    
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
     }
 }
 

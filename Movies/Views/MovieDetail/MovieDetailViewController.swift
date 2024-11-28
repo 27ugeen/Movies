@@ -43,7 +43,7 @@ final class MovieDetailViewController: UIViewController {
             self?.populateData()
         }
         viewModel.onError = { [weak self] errorMessage in
-            self?.showErrorAlert(message: errorMessage)
+            self?.showAlert(title: "Error", message: errorMessage)
         }
     }
     
@@ -59,14 +59,9 @@ final class MovieDetailViewController: UIViewController {
         trailerButton.isHidden = !details.video
         
         if let posterPath = details.posterPath {
-            let imageURL = URL(string: "https://image.tmdb.org/t/p/w780\(posterPath)")
-            if let url = imageURL {
-                loadImage(from: url)
-            } else {
-                posterImageView.image = nil
-            }
+            loadImage(from: "https://image.tmdb.org/t/p/w780\(posterPath)")
         } else {
-            posterImageView.image = nil
+            posterImageView.image = UIImage(named: "cat")
         }
         
         if let trailer = viewModel.movieVideos.first(where: { $0.type == "Trailer" }) {
@@ -79,10 +74,21 @@ final class MovieDetailViewController: UIViewController {
         }
     }
     
+    private func loadImage(from urlString: String) {
+        ImageLoader.loadImage(
+            into: posterImageView,
+            from: urlString,
+            onError: { [weak self] errorMessage in
+                self?.showAlert(title: "Image Error", message: errorMessage)
+            }
+        )
+    }
     
-
     @objc private func trailerButtonTapped() {
-        guard let trailer = viewModel.movieVideos.first(where: { $0.type == "Trailer" }) else { return }
+        guard let trailer = viewModel.movieVideos.first(where: { $0.type == "Trailer" }) else {
+            showAlert(title: "No Trailer Found", message: "Unfortunately, there is no trailer available for this movie.")
+            return
+        }
         
         let videoURLString: String
         switch trailer.site.lowercased() {
@@ -95,24 +101,21 @@ final class MovieDetailViewController: UIViewController {
             return
         }
         
-        guard let url = URL(string: videoURLString) else { return }
+        guard let url = URL(string: videoURLString) else {
+            showAlert(title: "Invalid URL", message: "The video URL could not be created.")
+            return
+        }
         VideoPlayerHelper.playVideo(from: url, on: self)
     }
     
-    private func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async {
-                self?.posterImageView.image = UIImage(data: data)
-            }
-        }.resume()
-    }
-    
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
+    //    private func loadImage(from url: URL) {
+    //        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+    //            guard let data = data, error == nil else { return }
+    //            DispatchQueue.main.async {
+    //                self?.posterImageView.image = UIImage(data: data)
+    //            }
+    //        }.resume()
+    //    }
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
@@ -144,7 +147,6 @@ final class MovieDetailViewController: UIViewController {
         setupLabels()
         setupTrailerButton()
     }
-    
     
     private func setupLabels() {
         [titleLabel, countryLabel, releaseYearLabel, genresLabel, descriptionLabel, ratingLabel].forEach {
