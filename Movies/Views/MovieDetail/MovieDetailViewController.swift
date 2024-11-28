@@ -42,7 +42,6 @@ final class MovieDetailViewController: UIViewController {
     
     private func bindViewModel() {
         viewModel.onDetailsUpdated = { [weak self] in
-            //            print("movie \(self?.viewModel.movieDetails)")
             self?.populateData()
         }
         viewModel.onError = { [weak self] errorMessage in
@@ -71,6 +70,19 @@ final class MovieDetailViewController: UIViewController {
         } else {
             posterImageView.image = nil
         }
+        
+        if let trailer = viewModel.movieVideos.first(where: { $0.type == "Trailer" }) {
+            trailerButton.isHidden = false
+            trailerButton.addTarget(self, action: #selector(trailerButtonTapped), for: .touchUpInside)
+            trailerButton.tag = trailer.key.hash
+            trailerButton.setTitle("Watch Trailer (\(trailer.site))", for: .normal)
+        } else {
+            trailerButton.isHidden = true
+        }
+    }
+    
+    @objc private func trailerButtonTapped() {
+        print("Watch Trailer tapped")
     }
     
     private func loadImage(from url: URL) {
@@ -168,9 +180,5 @@ final class MovieDetailViewController: UIViewController {
             trailerButton.topAnchor.constraint(equalTo: ratingLabel.topAnchor),
             trailerButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16)
         ])
-    }
-    
-    @objc private func trailerButtonTapped() {
-        print("Watch Trailer tapped")
     }
 }

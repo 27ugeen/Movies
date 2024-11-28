@@ -43,7 +43,15 @@ final class MovieListViewController: UIViewController {
     private func bindViewModel() {
         viewModel.onMoviesUpdated = { [weak self] in
             guard let self else { return }
-            let hasMovies = !viewModel.filteredMovies.isEmpty
+            
+            //need rewrite hasMovies
+            let hasMovies: Bool
+            if searchBar.text?.isEmpty == false {
+                hasMovies = !viewModel.foundMovies.isEmpty
+            } else {
+                hasMovies = !viewModel.filteredMovies.isEmpty
+            }
+
             emptyStateView.isHidden = hasMovies
             tableView.isHidden = !hasMovies
             tableView.reloadData()
@@ -100,6 +108,14 @@ final class MovieListViewController: UIViewController {
         navigationItem.rightBarButtonItem = sortButton
     }
     
+    private func updateSortButtonVisibility() {
+        if viewModel.searchBarIsActive {
+            navigationItem.rightBarButtonItem = nil
+        } else {
+            addSortButton()
+        }
+    }
+    
     @objc private func didTapSortButton() {
         let actionSheet = UIAlertController(
             title: "Sort Movies",
@@ -141,14 +157,14 @@ final class MovieListViewController: UIViewController {
 
 extension MovieListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.filteredMovies.count
+        return viewModel.searchBarIsActive ? viewModel.foundMovies.count : viewModel.filteredMovies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: MovieTableViewCell.identifier, for: indexPath) as? MovieTableViewCell else {
             return UITableViewCell()
         }
-        let movie = viewModel.filteredMovies[indexPath.row]
+        let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
         cell.configure(with: movie, genres: viewModel.genres)
         return cell
     }
@@ -161,9 +177,7 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle movie selection
-        
-        let movie = viewModel.filteredMovies[indexPath.row]
+        let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
         parentCoordinator?.showMovieDetails(with: movie.id)
     }
     
@@ -180,7 +194,24 @@ extension MovieListViewController: UITableViewDelegate {
 
 extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        viewModel.searchMovies(by: searchText)
+        guard !searchText.isEmpty else {
+            viewModel.searchBarIsActive = false
+            updateSortButtonVisibility()
+            tableView.reloadData()
+            return
+        }
+        
+        viewModel.searchBarIsActive = true
+        viewModel.searchMoviesDebounced(query: searchText)
+        updateSortButtonVisibility()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        viewModel.searchBarIsActive = false
+        updateSortButtonVisibility()
+        tableView.reloadData()
     }
     
 }
