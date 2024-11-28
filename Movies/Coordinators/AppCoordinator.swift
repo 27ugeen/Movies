@@ -21,6 +21,13 @@ final class AppCoordinator {
     func start() {
         let viewModel = MovieListViewModel(movieService: movieService)
         let movieListVC = MovieListViewController(viewModel: viewModel)
+        movieListVC.parentCoordinator = self 
         navigationController.pushViewController(movieListVC, animated: true)
+    }
+    
+    func showMovieDetails(with movieID: Int) {
+        let viewModel = MovieDetailViewModel(movieID: movieID, movieService: movieService)
+        let detailVC = MovieDetailViewController(viewModel: viewModel)
+        navigationController.pushViewController(detailVC, animated: true)
     }
 }

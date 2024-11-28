@@ -9,6 +9,8 @@ import UIKit
 
 final class MovieListViewController: UIViewController {
     
+    weak var parentCoordinator: AppCoordinator?
+    
     private let viewModel: MovieListViewModel
     
     private let searchBar = SearchBar()
@@ -41,14 +43,22 @@ final class MovieListViewController: UIViewController {
     private func bindViewModel() {
         viewModel.onMoviesUpdated = { [weak self] in
             guard let self else { return }
-            let hasMovies = !viewModel.filteredMovies.isEmpty
+            
+            //need rewrite hasMovies
+            let hasMovies: Bool
+            if searchBar.text?.isEmpty == false {
+                hasMovies = !viewModel.foundMovies.isEmpty
+            } else {
+                hasMovies = !viewModel.filteredMovies.isEmpty
+            }
+
             emptyStateView.isHidden = hasMovies
             tableView.isHidden = !hasMovies
             tableView.reloadData()
         }
         
         viewModel.onError = { [weak self] errorMessage in
-            self?.showErrorAlert(message: errorMessage)
+            self?.showAlert(title: "Error", message: errorMessage)
         }
     }
     
@@ -59,12 +69,6 @@ final class MovieListViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(searchBar)
         view.addSubview(emptyStateView)
-        NSLayoutConstraint.activate([
-            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            emptyStateView.topAnchor.constraint(equalTo: view.topAnchor),
-            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
         
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -74,7 +78,12 @@ final class MovieListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            emptyStateView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -97,6 +106,14 @@ final class MovieListViewController: UIViewController {
             action: #selector(didTapSortButton)
         )
         navigationItem.rightBarButtonItem = sortButton
+    }
+    
+    private func updateSortButtonVisibility() {
+        if viewModel.searchBarIsActive {
+            navigationItem.rightBarButtonItem = nil
+        } else {
+            addSortButton()
+        }
     }
     
     @objc private func didTapSortButton() {
@@ -130,24 +147,18 @@ final class MovieListViewController: UIViewController {
     private func sortMovies(by option: MovieSortOption) {
         viewModel.sortMovies(by: option)
     }
-    
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
 }
 
 extension MovieListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.filteredMovies.count
+        return viewModel.searchBarIsActive ? viewModel.foundMovies.count : viewModel.filteredMovies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: MovieTableViewCell.identifier, for: indexPath) as? MovieTableViewCell else {
             return UITableViewCell()
         }
-        let movie = viewModel.filteredMovies[indexPath.row]
+        let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
         cell.configure(with: movie, genres: viewModel.genres)
         return cell
     }
@@ -160,7 +171,8 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle movie selection
+        let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
+        parentCoordinator?.showMovieDetails(with: movie.id)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -176,6 +188,24 @@ extension MovieListViewController: UITableViewDelegate {
 
 extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        viewModel.searchMovies(by: searchText)
+        guard !searchText.isEmpty else {
+            viewModel.searchBarIsActive = false
+            updateSortButtonVisibility()
+            tableView.reloadData()
+            return
+        }
+        
+        viewModel.searchBarIsActive = true
+        viewModel.searchMoviesDebounced(query: searchText)
+        updateSortButtonVisibility()
     }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        viewModel.searchBarIsActive = false
+        updateSortButtonVisibility()
+        tableView.reloadData()
+    }
+    
 }

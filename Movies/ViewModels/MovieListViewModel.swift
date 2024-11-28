@@ -16,21 +16,24 @@ enum MovieSortOption {
 
 final class MovieListViewModel {
     private let movieService: MovieServiceProtocol
-    private(set) var movies: [Movie] = [] {
-        didSet {
-            filteredMovies = movies
-        }
-    }
+    private let debouncer: Debouncer
+    
+    private(set) var movies: [Movie] = []
     private(set) var filteredMovies: [Movie] = []
+    private(set) var foundMovies: [Movie] = []
     private(set) var genres: [Int: String] = [:]
+    
     var onMoviesUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
     
     private var currentPage: Int = 1
+    
+    var searchBarIsActive: Bool = false
     var currentSortOption: MovieSortOption = .popularityDescending
     
-    init(movieService: MovieServiceProtocol) {
+    init(movieService: MovieServiceProtocol, debounceDelay: TimeInterval = 0.5) {
         self.movieService = movieService
+        self.debouncer = Debouncer(delay: debounceDelay)
     }
     
     func fetchMovies(page: Int, sortBy: MovieSortOption) {
@@ -64,8 +67,10 @@ final class MovieListViewModel {
     }
     
     func loadMoreMovies() {
-        currentPage += 1
-        fetchMovies(page: currentPage, sortBy: currentSortOption)
+        if !searchBarIsActive {
+            currentPage += 1
+            fetchMovies(page: currentPage, sortBy: currentSortOption)
+        }
     }
     
     func sortMovies(by option: MovieSortOption) {
@@ -74,13 +79,22 @@ final class MovieListViewModel {
         fetchMovies(page: currentPage, sortBy: option)
     }
     
-    func searchMovies(by query: String) {
-        if query.isEmpty {
-            filteredMovies = movies
-        } else {
-            filteredMovies = movies.filter { $0.title.lowercased().contains(query.lowercased()) }
+    func searchMovies(by query: String, page: Int = 1) {
+        movieService.searchMovies(query: query, page: page) { [weak self] result in
+            switch result {
+            case .success(let movies):
+                self?.foundMovies = movies
+                self?.onMoviesUpdated?()
+            case .failure(let error):
+                self?.onError?(error.localizedDescription)
+            }
         }
-        onMoviesUpdated?()
+    }
+    
+    func searchMoviesDebounced(query: String) {
+        debouncer.debounce { [weak self] in
+            self?.searchMovies(by: query)
+        }
     }
     
     func fetchGenres(completion: @escaping () -> Void) {
