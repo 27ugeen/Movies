@@ -17,6 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let window = UIWindow(windowScene: scene)
         self.window = window
+        window.overrideUserInterfaceStyle = .light
         
         let navigationController = UINavigationController()
         

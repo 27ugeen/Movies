@@ -35,7 +35,7 @@ final class MovieListViewModel {
     
     init(movieService: MovieServiceProtocol, 
          networkMonitor: NetworkMonitorProtocol,
-         debounceDelay: TimeInterval = 0.5) {
+         debounceDelay: TimeInterval = 0.7) {
         self.movieService = movieService
         self.networkMonitor = networkMonitor
         self.debouncer = Debouncer(delay: debounceDelay)
@@ -60,7 +60,7 @@ final class MovieListViewModel {
         }
         
         movieService.fetchPopularMovies(page: page, sortBy: sortQuery) { [weak self] result in
-            print("started fetchPopularMovies")
+//            print("started fetchPopularMovies")
             switch result {
             case .success(let movies):
                 if page == 1 {

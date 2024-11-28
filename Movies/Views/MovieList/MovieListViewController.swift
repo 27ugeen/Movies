@@ -35,6 +35,25 @@ final class MovieListViewController: UIViewController {
         bindViewModel()
         setupUI()
         setupRefreshControl()
+        setupKeyboardDismissal()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Force initialization of the UISearchBar focus to eliminate the delay
+        searchBar.becomeFirstResponder()
+        searchBar.resignFirstResponder()
+    }
+    
+    private func setupKeyboardDismissal() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     private func fetchGenresAndMovies() {
@@ -43,7 +62,6 @@ final class MovieListViewController: UIViewController {
             guard let self else { return }
             viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption) {
                 self.toggleLoadingIndicator(false)
-                self.refreshControl.endRefreshing()
             }
         }
     }
@@ -59,7 +77,7 @@ final class MovieListViewController: UIViewController {
             } else {
                 hasMovies = !viewModel.filteredMovies.isEmpty
             }
-
+            
             emptyStateView.isHidden = hasMovies
             tableView.isHidden = !hasMovies
             tableView.reloadData()
@@ -120,8 +138,6 @@ final class MovieListViewController: UIViewController {
         tableView.delegate = self
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
         
-        refreshControl.addTarget(self, action: #selector(refreshMovies), for: .valueChanged)
-                
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         
     }
@@ -196,6 +212,14 @@ final class MovieListViewController: UIViewController {
     private func sortMovies(by option: MovieSortOption) {
         viewModel.sortMovies(by: option)
     }
+    
+    private func cleanSearch() {
+        searchBar.searchTextField.text = ""
+        searchBar.resignFirstResponder()
+        viewModel.searchBarIsActive = false
+        updateSortButtonVisibility()
+        tableView.reloadData()
+    }
 }
 
 extension MovieListViewController: UITableViewDataSource {
@@ -220,6 +244,7 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        cleanSearch()
         let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
         parentCoordinator?.showMovieDetails(with: movie.id)
     }
@@ -238,9 +263,7 @@ extension MovieListViewController: UITableViewDelegate {
 extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard !searchText.isEmpty else {
-            viewModel.searchBarIsActive = false
-            updateSortButtonVisibility()
-            tableView.reloadData()
+            cleanSearch()
             return
         }
         
@@ -249,12 +272,7 @@ extension MovieListViewController: UISearchBarDelegate {
         updateSortButtonVisibility()
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.text = ""
-        searchBar.resignFirstResponder()
-        viewModel.searchBarIsActive = false
-        updateSortButtonVisibility()
-        tableView.reloadData()
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        cleanSearch()
     }
-    
 }
