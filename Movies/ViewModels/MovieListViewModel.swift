@@ -44,7 +44,9 @@ final class MovieListViewModel {
         onNetworkStatusChange?(networkMonitor.isConnected)
     }
     
-    func fetchMovies(page: Int, sortBy: MovieSortOption) {
+    func fetchMovies(page: Int, sortBy: MovieSortOption, completion: (() -> Void)? = nil) {
+        defer { completion?() }
+        
         let sortQuery: String
         switch sortBy {
         case .popularityDescending:
@@ -58,6 +60,7 @@ final class MovieListViewModel {
         }
         
         movieService.fetchPopularMovies(page: page, sortBy: sortQuery) { [weak self] result in
+            print("started fetchPopularMovies")
             switch result {
             case .success(let movies):
                 if page == 1 {
