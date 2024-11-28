@@ -11,22 +11,24 @@ final class AppCoordinator {
     private let navigationController: UINavigationController
     private let apiClient: APIClientProtocol
     private let movieService: MovieServiceProtocol
+    private let networkMonitor: NetworkMonitorProtocol
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
         self.apiClient = APIClient()
         self.movieService = MovieService(apiClient: apiClient)
+        self.networkMonitor = NetworkMonitor.shared
     }
     
     func start() {
-        let viewModel = MovieListViewModel(movieService: movieService)
+        let viewModel = MovieListViewModel(movieService: movieService, networkMonitor: networkMonitor)
         let movieListVC = MovieListViewController(viewModel: viewModel)
-        movieListVC.parentCoordinator = self 
+        movieListVC.parentCoordinator = self
         navigationController.pushViewController(movieListVC, animated: true)
     }
     
     func showMovieDetails(with movieID: Int) {
-        let viewModel = MovieDetailViewModel(movieID: movieID, movieService: movieService)
+        let viewModel = MovieDetailViewModel(movieID: movieID, movieService: movieService, networkMonitor: networkMonitor)
         let detailVC = MovieDetailViewController(viewModel: viewModel)
         navigationController.pushViewController(detailVC, animated: true)
     }

@@ -60,6 +60,14 @@ final class MovieListViewController: UIViewController {
         viewModel.onError = { [weak self] errorMessage in
             self?.showAlert(title: "Error", message: errorMessage)
         }
+        viewModel.onNetworkStatusChange = { [weak self] isConnected in
+            if !isConnected {
+                self?.showAlert(
+                    title: "No Internet",
+                    message: "You are offline. Please, enable your Wi-Fi or connect using cellular data."
+                )
+            }
+        }
     }
     
     private func setupUI() {

@@ -10,16 +10,24 @@ import Foundation
 final class MovieDetailViewModel {
     private let movieID: Int
     private let movieService: MovieServiceProtocol
+    private let networkMonitor: NetworkMonitorProtocol
     
     private(set) var movieDetails: MovieDetails?
     private(set) var movieVideos: [MovieVideo] = []
     
     var onDetailsUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
+    var onNetworkStatusChange: ((Bool) -> Void)?
     
-    init(movieID: Int, movieService: MovieServiceProtocol) {
+    init(movieID: Int, 
+         movieService: MovieServiceProtocol,
+         networkMonitor: NetworkMonitorProtocol) {
         self.movieID = movieID
         self.movieService = movieService
+        self.networkMonitor = networkMonitor
+        
+        networkMonitor.delegate = self
+        onNetworkStatusChange?(networkMonitor.isConnected)
     }
     
     func fetchMovieDetails() {
@@ -50,5 +58,11 @@ final class MovieDetailViewModel {
                 self?.onError?(error.localizedDescription)
             }
         }
+    }
+}
+
+extension MovieDetailViewModel: NetworkMonitorDelegate {
+    func networkStatusDidChange(isConnected: Bool) {
+        onNetworkStatusChange?(isConnected)
     }
 }

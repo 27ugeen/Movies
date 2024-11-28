@@ -16,6 +16,7 @@ enum MovieSortOption {
 
 final class MovieListViewModel {
     private let movieService: MovieServiceProtocol
+    private let networkMonitor: NetworkMonitorProtocol
     private let debouncer: Debouncer
     
     private(set) var movies: [Movie] = []
@@ -25,15 +26,22 @@ final class MovieListViewModel {
     
     var onMoviesUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
+    var onNetworkStatusChange: ((Bool) -> Void)?
     
     private var currentPage: Int = 1
     
     var searchBarIsActive: Bool = false
     var currentSortOption: MovieSortOption = .popularityDescending
     
-    init(movieService: MovieServiceProtocol, debounceDelay: TimeInterval = 0.5) {
+    init(movieService: MovieServiceProtocol, 
+         networkMonitor: NetworkMonitorProtocol,
+         debounceDelay: TimeInterval = 0.5) {
         self.movieService = movieService
+        self.networkMonitor = networkMonitor
         self.debouncer = Debouncer(delay: debounceDelay)
+        
+        networkMonitor.delegate = self
+        onNetworkStatusChange?(networkMonitor.isConnected)
     }
     
     func fetchMovies(page: Int, sortBy: MovieSortOption) {
@@ -108,5 +116,11 @@ final class MovieListViewModel {
                 completion()
             }
         }
+    }
+}
+
+extension MovieListViewModel: NetworkMonitorDelegate {
+    func networkStatusDidChange(isConnected: Bool) {
+        onNetworkStatusChange?(isConnected)
     }
 }

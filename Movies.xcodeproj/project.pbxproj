@@ -37,6 +37,7 @@
 		11F06A0F2CF8C93600E51A3C /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A0E2CF8C93600E51A3C /* UIViewController+Extension.swift */; };
 		11F06A122CF8CBDA00E51A3C /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 11F06A112CF8CBDA00E51A3C /* Kingfisher */; };
 		11F06A142CF8D4FC00E51A3C /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A132CF8D4FC00E51A3C /* ImageLoader.swift */; };
+		11F06A162CF8DAD800E51A3C /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A152CF8DAD800E51A3C /* NetworkMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,7 @@
 		11F06A0C2CF8C5C900E51A3C /* VideoPlayerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerHelper.swift; sourceTree = "<group>"; };
 		11F06A0E2CF8C93600E51A3C /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		11F06A132CF8D4FC00E51A3C /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
+		11F06A152CF8DAD800E51A3C /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +134,7 @@
 			isa = PBXGroup;
 			children = (
 				11F069E02CF79F5600E51A3C /* API */,
+				11F06A152CF8DAD800E51A3C /* NetworkMonitor.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -374,6 +377,7 @@
 				115E6E742CF7102A00A6CAC6 /* Movie.swift in Sources */,
 				11F069DF2CF78EF600E51A3C /* Genre.swift in Sources */,
 				11F06A092CF87F4800E51A3C /* MovieVideo.swift in Sources */,
+				11F06A162CF8DAD800E51A3C /* NetworkMonitor.swift in Sources */,
 				11F069F32CF7A90600E51A3C /* CommonLabel.swift in Sources */,
 				11F06A0D2CF8C5C900E51A3C /* VideoPlayerHelper.swift in Sources */,
 				11F069E92CF7A0B100E51A3C /* EmptyStateView.swift in Sources */,
