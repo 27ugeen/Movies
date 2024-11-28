@@ -33,6 +33,7 @@
 		11F06A022CF868AB00E51A3C /* MovieDetailLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A012CF868AB00E51A3C /* MovieDetailLabel.swift */; };
 		11F06A092CF87F4800E51A3C /* MovieVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A082CF87F4800E51A3C /* MovieVideo.swift */; };
 		11F06A0B2CF8942300E51A3C /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A0A2CF8942300E51A3C /* Debouncer.swift */; };
+		11F06A0D2CF8C5C900E51A3C /* VideoPlayerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A0C2CF8C5C900E51A3C /* VideoPlayerHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +64,7 @@
 		11F06A012CF868AB00E51A3C /* MovieDetailLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailLabel.swift; sourceTree = "<group>"; };
 		11F06A082CF87F4800E51A3C /* MovieVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieVideo.swift; sourceTree = "<group>"; };
 		11F06A0A2CF8942300E51A3C /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
+		11F06A0C2CF8C5C900E51A3C /* VideoPlayerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +218,7 @@
 			isa = PBXGroup;
 			children = (
 				11F06A0A2CF8942300E51A3C /* Debouncer.swift */,
+				11F06A0C2CF8C5C900E51A3C /* VideoPlayerHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -362,6 +365,7 @@
 				11F069DF2CF78EF600E51A3C /* Genre.swift in Sources */,
 				11F06A092CF87F4800E51A3C /* MovieVideo.swift in Sources */,
 				11F069F32CF7A90600E51A3C /* CommonLabel.swift in Sources */,
+				11F06A0D2CF8C5C900E51A3C /* VideoPlayerHelper.swift in Sources */,
 				11F069E92CF7A0B100E51A3C /* EmptyStateView.swift in Sources */,
 				115E6E7C2CF7112100A6CAC6 /* MovieListViewModel.swift in Sources */,
 				11F06A022CF868AB00E51A3C /* MovieDetailLabel.swift in Sources */,

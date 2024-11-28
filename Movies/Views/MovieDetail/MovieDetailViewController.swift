@@ -7,8 +7,6 @@
 
 import UIKit
 
-import UIKit
-
 final class MovieDetailViewController: UIViewController {
     
     private let viewModel: MovieDetailViewModel
@@ -81,8 +79,24 @@ final class MovieDetailViewController: UIViewController {
         }
     }
     
+    
+
     @objc private func trailerButtonTapped() {
-        print("Watch Trailer tapped")
+        guard let trailer = viewModel.movieVideos.first(where: { $0.type == "Trailer" }) else { return }
+        
+        let videoURLString: String
+        switch trailer.site.lowercased() {
+        case "youtube":
+            videoURLString = "https://www.youtube.com/embed/\(trailer.key)?autoplay=1"
+        case "vimeo":
+            videoURLString = "https://player.vimeo.com/video/\(trailer.key)?autoplay=1"
+        default:
+            print("Unsupported video site: \(trailer.site)")
+            return
+        }
+        
+        guard let url = URL(string: videoURLString) else { return }
+        VideoPlayerHelper.playVideo(from: url, on: self)
     }
     
     private func loadImage(from url: URL) {
