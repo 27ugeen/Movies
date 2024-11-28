@@ -9,6 +9,8 @@ import UIKit
 
 final class MovieDetailViewController: UIViewController {
     
+    weak var parentCoordinator: AppCoordinator?
+    
     private let viewModel: MovieDetailViewModel
     
     private let scrollView = UIScrollView()
@@ -36,6 +38,7 @@ final class MovieDetailViewController: UIViewController {
         viewModel.fetchMovieDetails()
         bindViewModel()
         setupUI()
+        addPosterTapGesture()
     }
     
     private func bindViewModel() {
@@ -53,6 +56,20 @@ final class MovieDetailViewController: UIViewController {
                 )
             }
         }
+        viewModel.onPosterTapped = { [weak self] posterURL in
+            guard let self else { return }
+            self.parentCoordinator?.showPosterView(for: posterURL)
+        }
+    }
+    
+    private func addPosterTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapPoster))
+        posterImageView.isUserInteractionEnabled = true
+        posterImageView.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func didTapPoster() {
+        viewModel.handlePosterTap()
     }
     
     private func populateData() {
@@ -115,15 +132,6 @@ final class MovieDetailViewController: UIViewController {
         }
         VideoPlayerHelper.playVideo(from: url, on: self)
     }
-    
-    //    private func loadImage(from url: URL) {
-    //        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-    //            guard let data = data, error == nil else { return }
-    //            DispatchQueue.main.async {
-    //                self?.posterImageView.image = UIImage(data: data)
-    //            }
-    //        }.resume()
-    //    }
     
     private func setupUI() {
         view.backgroundColor = .systemBackground

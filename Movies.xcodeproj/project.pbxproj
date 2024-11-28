@@ -38,6 +38,7 @@
 		11F06A122CF8CBDA00E51A3C /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 11F06A112CF8CBDA00E51A3C /* Kingfisher */; };
 		11F06A142CF8D4FC00E51A3C /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A132CF8D4FC00E51A3C /* ImageLoader.swift */; };
 		11F06A162CF8DAD800E51A3C /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A152CF8DAD800E51A3C /* NetworkMonitor.swift */; };
+		11F06A192CF9156900E51A3C /* PosterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11F06A182CF9156900E51A3C /* PosterViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +73,7 @@
 		11F06A0E2CF8C93600E51A3C /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		11F06A132CF8D4FC00E51A3C /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		11F06A152CF8DAD800E51A3C /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		11F06A182CF9156900E51A3C /* PosterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosterViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +155,7 @@
 			children = (
 				11F069E12CF79F7000E51A3C /* MovieList */,
 				11F069F92CF7B38400E51A3C /* MovieDetail */,
+				11F06A172CF9155B00E51A3C /* Poster */,
 				11F069E22CF79F9400E51A3C /* SharedComponents */,
 			);
 			path = Views;
@@ -292,6 +295,14 @@
 			name = Configuration;
 			sourceTree = "<group>";
 		};
+		11F06A172CF9155B00E51A3C /* Poster */ = {
+			isa = PBXGroup;
+			children = (
+				11F06A182CF9156900E51A3C /* PosterViewController.swift */,
+			);
+			path = Poster;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -391,6 +402,7 @@
 				11F06A0B2CF8942300E51A3C /* Debouncer.swift in Sources */,
 				11F069F12CF7A83F00E51A3C /* OverlayView.swift in Sources */,
 				115E6E5C2CF706FE00A6CAC6 /* SceneDelegate.swift in Sources */,
+				11F06A192CF9156900E51A3C /* PosterViewController.swift in Sources */,
 				115E6E7E2CF7118D00A6CAC6 /* MovieListViewController.swift in Sources */,
 				115E6E782CF7108D00A6CAC6 /* APIClient.swift in Sources */,
 				11F069DD2CF7391200E51A3C /* MovieTableViewCell.swift in Sources */,

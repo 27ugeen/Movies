@@ -17,6 +17,9 @@ final class MovieListViewController: UIViewController {
     private let tableView = MovieListTableView()
     private let emptyStateView = EmptyStateView()
     
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let refreshControl = UIRefreshControl()
+    
     init(viewModel: MovieListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -31,12 +34,35 @@ final class MovieListViewController: UIViewController {
         fetchGenresAndMovies()
         bindViewModel()
         setupUI()
+        setupRefreshControl()
+        setupKeyboardDismissal()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Force initialization of the UISearchBar focus to eliminate the delay
+        searchBar.becomeFirstResponder()
+        searchBar.resignFirstResponder()
+    }
+    
+    private func setupKeyboardDismissal() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     private func fetchGenresAndMovies() {
+        toggleLoadingIndicator(true)
         viewModel.fetchGenres { [weak self] in
             guard let self else { return }
-            viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption)
+            viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption) {
+                self.toggleLoadingIndicator(false)
+            }
         }
     }
     
@@ -51,13 +77,16 @@ final class MovieListViewController: UIViewController {
             } else {
                 hasMovies = !viewModel.filteredMovies.isEmpty
             }
-
+            
             emptyStateView.isHidden = hasMovies
             tableView.isHidden = !hasMovies
             tableView.reloadData()
+            self.refreshControl.endRefreshing()
         }
         
         viewModel.onError = { [weak self] errorMessage in
+            self?.toggleLoadingIndicator(false)
+            self?.refreshControl.endRefreshing()
             self?.showAlert(title: "Error", message: errorMessage)
         }
         viewModel.onNetworkStatusChange = { [weak self] isConnected in
@@ -77,6 +106,7 @@ final class MovieListViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(searchBar)
         view.addSubview(emptyStateView)
+        view.addSubview(activityIndicator)
         
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -91,7 +121,10 @@ final class MovieListViewController: UIViewController {
             emptyStateView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
@@ -104,6 +137,30 @@ final class MovieListViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        
+    }
+    
+    private func setupRefreshControl() {
+        refreshControl.addTarget(self, action: #selector(refreshMovies), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+    }
+    
+    @objc private func refreshMovies() {
+        viewModel.fetchMovies(page: 1, sortBy: viewModel.currentSortOption) {
+            self.refreshControl.endRefreshing()
+        }
+    }
+    
+    private func toggleLoadingIndicator(_ isLoading: Bool) {
+        if isLoading {
+            activityIndicator.startAnimating()
+            activityIndicator.isHidden = false
+        } else {
+            activityIndicator.stopAnimating()
+            activityIndicator.isHidden = true
+        }
     }
     
     private func addSortButton() {
@@ -155,6 +212,14 @@ final class MovieListViewController: UIViewController {
     private func sortMovies(by option: MovieSortOption) {
         viewModel.sortMovies(by: option)
     }
+    
+    private func cleanSearch() {
+        searchBar.searchTextField.text = ""
+        searchBar.resignFirstResponder()
+        viewModel.searchBarIsActive = false
+        updateSortButtonVisibility()
+        tableView.reloadData()
+    }
 }
 
 extension MovieListViewController: UITableViewDataSource {
@@ -179,6 +244,7 @@ extension MovieListViewController: UITableViewDataSource {
 extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        cleanSearch()
         let movie = viewModel.searchBarIsActive ? viewModel.foundMovies[indexPath.row] : viewModel.filteredMovies[indexPath.row]
         parentCoordinator?.showMovieDetails(with: movie.id)
     }
@@ -197,9 +263,7 @@ extension MovieListViewController: UITableViewDelegate {
 extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard !searchText.isEmpty else {
-            viewModel.searchBarIsActive = false
-            updateSortButtonVisibility()
-            tableView.reloadData()
+            cleanSearch()
             return
         }
         
@@ -208,12 +272,7 @@ extension MovieListViewController: UISearchBarDelegate {
         updateSortButtonVisibility()
     }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.text = ""
-        searchBar.resignFirstResponder()
-        viewModel.searchBarIsActive = false
-        updateSortButtonVisibility()
-        tableView.reloadData()
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        cleanSearch()
     }
-    
 }

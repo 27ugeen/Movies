@@ -30,6 +30,13 @@ final class AppCoordinator {
     func showMovieDetails(with movieID: Int) {
         let viewModel = MovieDetailViewModel(movieID: movieID, movieService: movieService, networkMonitor: networkMonitor)
         let detailVC = MovieDetailViewController(viewModel: viewModel)
+        detailVC.parentCoordinator = self
         navigationController.pushViewController(detailVC, animated: true)
+    }
+    
+    func showPosterView(for posterURL: URL) {
+        let posterVC = PosterViewController(posterURL: posterURL)
+        posterVC.modalPresentationStyle = .fullScreen
+        navigationController.present(posterVC, animated: true, completion: nil)
     }
 }
