@@ -9,6 +9,8 @@ import UIKit
 
 final class MovieListViewController: UIViewController {
     
+    weak var parentCoordinator: AppCoordinator?
+    
     private let viewModel: MovieListViewModel
     
     private let searchBar = SearchBar()
@@ -59,12 +61,6 @@ final class MovieListViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(searchBar)
         view.addSubview(emptyStateView)
-        NSLayoutConstraint.activate([
-            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            emptyStateView.topAnchor.constraint(equalTo: view.topAnchor),
-            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
         
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -74,7 +70,12 @@ final class MovieListViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            emptyStateView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -161,6 +162,9 @@ extension MovieListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // Handle movie selection
+        
+        let movie = viewModel.filteredMovies[indexPath.row]
+        parentCoordinator?.showMovieDetails(with: movie.id)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -178,4 +182,5 @@ extension MovieListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.searchMovies(by: searchText)
     }
+    
 }

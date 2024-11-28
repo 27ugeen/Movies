@@ -25,7 +25,8 @@ final class MovieService: MovieServiceProtocol {
         let queryItems = [
             URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "language", value: "en-US"),
-            URLQueryItem(name: "sort_by", value: sortBy)
+            URLQueryItem(name: "sort_by", value: sortBy),
+//            URLQueryItem(name: "include_video", value: "true")
         ]
         
         apiClient.performRequest(endpoint: "discover/movie", queryItems: queryItems) { (result: Result<MovieResponse, Error>) in
