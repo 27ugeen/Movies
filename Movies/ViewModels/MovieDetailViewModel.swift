@@ -18,6 +18,7 @@ final class MovieDetailViewModel {
     var onDetailsUpdated: (() -> Void)?
     var onError: ((String) -> Void)?
     var onNetworkStatusChange: ((Bool) -> Void)?
+    var onPosterTapped: ((URL) -> Void)?
     
     init(movieID: Int, 
          movieService: MovieServiceProtocol,
@@ -58,6 +59,19 @@ final class MovieDetailViewModel {
                 self?.onError?(error.localizedDescription)
             }
         }
+    }
+    
+    func handlePosterTap() {
+        guard let posterPath = movieDetails?.posterPath else {
+            onError?("Poster not available.")
+            return
+        }
+        let urlString = "https://image.tmdb.org/t/p/original\(posterPath)"
+        guard let url = URL(string: urlString) else {
+            onError?("Invalid poster URL.")
+            return
+        }
+        onPosterTapped?(url)
     }
 }
 
